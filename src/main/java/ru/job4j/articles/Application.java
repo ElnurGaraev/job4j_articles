@@ -8,6 +8,7 @@ import ru.job4j.articles.store.ArticleStore;
 import ru.job4j.articles.store.WordStore;
 
 import java.io.InputStream;
+import java.lang.ref.SoftReference;
 import java.util.Properties;
 
 public class Application {
@@ -18,10 +19,14 @@ public class Application {
 
     public static void main(String[] args) {
         var properties = loadProperties();
-        var wordStore = new WordStore(properties);
-        var articleStore = new ArticleStore(properties);
-        var articleGenerator = new RandomArticleGenerator();
-        var articleService = new SimpleArticleService(articleGenerator);
+        SoftReference<WordStore> wordStoreSoft = new SoftReference<>(new WordStore(properties));
+        var wordStore = wordStoreSoft.get();
+        SoftReference<ArticleStore> articleStoreSoft = new SoftReference<>(new ArticleStore(properties));
+        var articleStore = articleStoreSoft.get();
+        SoftReference<RandomArticleGenerator> randomArticle = new SoftReference<>(new RandomArticleGenerator());
+        var articleGenerator = randomArticle.get();
+        SoftReference<SimpleArticleService> simpleArticleService = new SoftReference<>(new SimpleArticleService(articleGenerator));
+        var articleService = simpleArticleService.get();
         articleService.generate(wordStore, TARGET_COUNT, articleStore);
     }
 
@@ -36,5 +41,4 @@ public class Application {
         }
         return properties;
     }
-
 }
